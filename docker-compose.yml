@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: magic-auto-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: magic_auto
+      POSTGRES_PASSWORD: magic_auto
+      POSTGRES_DB: magic_auto
+    ports:
+      # Host port 5433 -> avoids clashing with any other local Postgres on 5432
+      - "5433:5432"
+    volumes:
+      - magic-auto-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U magic_auto -d magic_auto"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  magic-auto-pgdata:

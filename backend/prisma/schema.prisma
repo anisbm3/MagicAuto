@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String
+  role      String    @default("ADMIN") // SUPER_ADMIN or ADMIN
+  active    Boolean   @default(true)
+  createdAt DateTime? @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Vehicle {
+  id           Int       @id @default(autoincrement())
+  brand        String
+  model        String
+  slug         String    @unique
+  price        Int
+  year         Int
+  mileage      Int
+  fuel         String
+  transmission String
+  engine       String?
+  power        String?
+  color        String?
+  bodyType     String?   @map("body_type")
+  description  String
+  equipment    String? // comma separated or JSON string
+  images       String // comma separated URLs
+  featured     Boolean   @default(false)
+  status       String    @default("Disponible") // Disponible, Réservée, Vendue
+  createdAt    DateTime? @default(now()) @map("created_at")
+  updatedAt    DateTime? @default(now()) @map("updated_at")
+
+  @@map("vehicles")
+}
+
+model Service {
+  id          Int           @id @default(autoincrement())
+  name        String
+  category    String // Lavage, Entretien, Esthétique, Diagnostic, Other
+  description String
+  price       Int? // Optional starting price
+  duration    String? // e.g. "2h"
+  image       String?
+  active      Boolean       @default(true)
+  featured    Boolean       @default(false)
+  createdAt   DateTime?     @default(now()) @map("created_at")
+  appointments Appointment[]
+
+  @@map("services")
+}
+
+model Appointment {
+  id            Int       @id @default(autoincrement())
+  reference     String    @unique
+  customerName  String    @map("customer_name")
+  customerEmail String    @map("customer_email")
+  customerPhone String    @map("customer_phone")
+  vehicleBrand  String?   @map("vehicle_brand")
+  vehicleModel  String?   @map("vehicle_model")
+  serviceId     Int?      @map("service_id")
+  service       Service?  @relation(fields: [serviceId], references: [id])
+  date          String // YYYY-MM-DD
+  time          String // HH:MM
+  notes         String?
+  status        String    @default("Pending") // Pending, Confirmed, Completed, Cancelled
+  createdAt     DateTime? @default(now()) @map("created_at")
+
+  @@map("appointments")
+}
+
+model Message {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String
+  subject   String
+  message   String
+  status    String    @default("Unread") // Unread, Read
+  createdAt DateTime? @default(now()) @map("created_at")
+
+  @@map("messages")
+}
+
+model Review {
+  id           Int       @id @default(autoincrement())
+  customerName String    @map("customer_name")
+  rating       Int
+  comment      String
+  active       Boolean   @default(true)
+  createdAt    DateTime? @default(now()) @map("created_at")
+
+  @@map("reviews")
+}
+
+model Setting {
+  id              Int    @id @default(autoincrement())
+  businessName    String @default("MAGIC AUTO") @map("business_name")
+  phone           String @default("+33 1 23 45 67 89")
+  whatsapp        String @default("+33 6 12 34 56 78")
+  email           String @default("contact@magicauto.com")
+  address         String @default("123 Avenue de l'Automobile, 75000 Paris")
+  openingHours    String @default("Lun-Sam: 9h-18h") @map("opening_hours")
+  seoTitle        String @default("MAGIC AUTO | Premium Automotive Showroom") @map("seo_title")
+  seoDescription  String @default("Showroom automobile, lavage, entretien et esthétique.") @map("seo_description")
+
+  @@map("settings")
+}
